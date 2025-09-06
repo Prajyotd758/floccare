@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import gsap from "gsap";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import ResponseBox from "./ResponseBox";
 import { LoginForm } from "./LoginForm";
@@ -10,6 +11,7 @@ import ResponseBoxList from "./ResponseBoxList";
 import { SmallSpinner } from "./Spinner";
 
 export default function HomeScreen({ chatId }: { chatId?: string }) {
+  const router = useRouter();
   const [firstPrompt, setfirstPrompt] = useState<boolean>(true);
   const [prompt, setPrompt] = useState<string>("");
   const [ScrollIn, SetScrollIn] = useState<string>("");
@@ -130,13 +132,13 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
         }
       );
       const data = await response.json();
-      
+
       if (session?.user) {
         const newPrompts = [...prompts, prompt];
         const newResponses = [...responses, data.choices?.[0]?.message.content];
         await saveBlogs(newPrompts, newResponses);
       }
-      
+
       scrollToBottom();
       setPrompts((prev) => [...prev, prompt]);
       setResponses((prev) => [...prev, data.choices?.[0]?.message.content]);
@@ -170,6 +172,20 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
     } finally {
     }
   };
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/");
+      return;
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return <SmallSpinner />;
+  }
+  if (status === "unauthenticated") {
+    return null;
+  }
 
   return (
     <div
