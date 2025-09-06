@@ -173,20 +173,6 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
     }
   };
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/");
-      return;
-    }
-  }, [status, router]);
-
-  if (status === "loading") {
-    return <SmallSpinner />;
-  }
-  if (status === "unauthenticated") {
-    return null;
-  }
-
   return (
     <div
       className={`bg-gray-700 flex justify-center items-center rounded-r-lg w-full h-[100%] overflow-y-auto overflow-x-hidden`}
