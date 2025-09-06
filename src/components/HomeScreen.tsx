@@ -7,12 +7,24 @@ import { signOut } from "next-auth/react";
 import ResponseBox from "./ResponseBox";
 import { LoginForm } from "./LoginForm";
 import ResponseBoxList from "./ResponseBoxList";
+import { SmallSpinner } from "./Spinner";
 
 export default function HomeScreen({ chatId }: { chatId?: string }) {
   const [firstPrompt, setfirstPrompt] = useState<boolean>(true);
   const [prompt, setPrompt] = useState<string>("");
   const [ScrollIn, SetScrollIn] = useState<String>("");
   const [toggle, SetToggle] = useState<boolean>(true);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  };
+
+  const [spinner, SetSpinner] = useState<boolean>(false);
+
   const mm = gsap.matchMedia();
 
   const fetchedListLength = useRef<number>(0);
@@ -61,11 +73,14 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      SetSpinner(false);
     }
   };
 
   useEffect(() => {
     if (session?.user) {
+      SetSpinner(true);
       fetchChats();
     }
   }, [session, status]);
@@ -92,6 +107,7 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
       alert("please enter prompt");
       return;
     }
+    SetSpinner(true);
 
     try {
       const response = await fetch(
@@ -99,8 +115,7 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
         {
           method: "POST",
           headers: {
-            Authorization:
-              "Bearer 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",
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -115,15 +130,17 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
         }
       );
       const data = await response.json();
-
+      
       if (session?.user) {
         const newPrompts = [...prompts, prompt];
         const newResponses = [...responses, data.choices?.[0]?.message.content];
         await saveBlogs(newPrompts, newResponses);
       }
-
+      
+      scrollToBottom();
       setPrompts((prev) => [...prev, prompt]);
       setResponses((prev) => [...prev, data.choices?.[0]?.message.content]);
+      SetSpinner(false);
 
       if (firstPrompt) {
         mm.add("(max-width: 768px)", () => {
@@ -150,6 +167,7 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
       setPrompt("");
     } catch (error) {
       console.log(error);
+    } finally {
     }
   };
 
@@ -164,7 +182,9 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
               ? window.innerWidth > 800
                 ? SetScrollIn("animate")
                 : SetScrollIn("animate-mobile")
-              : window.innerWidth > 800 ? SetScrollIn("animate-out") : SetScrollIn("animate-out-mobile");
+              : window.innerWidth > 800
+              ? SetScrollIn("animate-out")
+              : SetScrollIn("animate-out-mobile");
 
             SetToggle(!toggle);
           }}
@@ -205,7 +225,9 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
         <button
           type="submit"
           className="bg-blue-400 text-white text-3xl font-extrabold rounded-full w-[10%]"
-          onClick={(e) => Generate(e)}
+          onClick={(e) => {
+            Generate(e);
+          }}
         >
           ↑
         </button>
@@ -213,26 +235,33 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
 
       <LoginForm scrollin={ScrollIn} />
 
-      <div className="w-3xl max-lg:w-2xl max-md:w-[90%] max-sm:mb-0 mb-18 h-[80%] rounded-2xl overflow-y-auto">
-        {prompts &&
-          prompts.length > 0 &&
-          prompts.map((value, index) => {
-            return (
-              <div key={value + index}>
-                {prompts.length === responses.length &&
-                fetchedListLength.current <= index ? (
-                  <ResponseBox
-                    text={responses[index]}
-                    prompt={value}
-                    addResponse={setResponses}
-                  />
-                ) : (
-                  <ResponseBoxList text={responses[index]} prompt={value} />
-                )}
-              </div>
-            );
-          })}
-      </div>
+      {spinner ? (
+        <SmallSpinner />
+      ) : (
+        <div
+          className="w-3xl max-lg:w-2xl max-md:w-[90%] max-sm:mb-0 mb-18 h-[80%] rounded-2xl overflow-y-auto"
+          ref={containerRef}
+        >
+          {prompts &&
+            prompts.length > 0 &&
+            prompts.map((value, index) => {
+              return (
+                <div key={value + index}>
+                  {prompts.length === responses.length &&
+                  fetchedListLength.current <= index ? (
+                    <ResponseBox
+                      text={responses[index]}
+                      prompt={value}
+                      addResponse={setResponses}
+                    />
+                  ) : (
+                    <ResponseBoxList text={responses[index]} prompt={value} />
+                  )}
+                </div>
+              );
+            })}
+        </div>
+      )}
     </div>
   );
 }

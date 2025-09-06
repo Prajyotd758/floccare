@@ -15,8 +15,6 @@ export default function Home() {
         method: "POST",
         body: JSON.stringify({
           userId: session?.user?.name,
-          prompts: [],
-          responses: [],
         }),
       });
 

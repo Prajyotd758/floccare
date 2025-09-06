@@ -28,6 +28,8 @@ export async function POST(req: Request) {
   try {
     const res = await Blog.create({
       ...data,
+      prompts: [],
+      responses: [],
     });
 
     if (res) {
