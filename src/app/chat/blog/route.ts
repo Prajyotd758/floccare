@@ -26,8 +26,6 @@ export async function POST(req: Request) {
   const data = await req.json();
 
   try {
-    const response = await Blog.find({ userId: data.userId });
-
     const res = await Blog.create({
       ...data,
       prompts: [],

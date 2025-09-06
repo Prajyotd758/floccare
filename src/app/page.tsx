@@ -15,6 +15,8 @@ export default function Home() {
         method: "POST",
         body: JSON.stringify({
           userId: session?.user?.name,
+          prompts: [],
+          responses: [],
         }),
       });
 
@@ -23,9 +25,6 @@ export default function Home() {
     } catch (error) {}
   };
 
-  if (status === "loading") {
-    return null;
-  }
   useEffect(() => {
     if (status === "authenticated") {
       saveBlogs();
@@ -33,5 +32,8 @@ export default function Home() {
     }
   }, [status, router]);
 
+  if (status === "loading") {
+    return null;
+  }
   return <HomeScreen />;
 }
