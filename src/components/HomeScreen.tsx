@@ -123,7 +123,7 @@ export default function HomeScreen({ chatId }: { chatId?: string }) {
             messages: [
               {
                 role: "user",
-                content: prompt,
+                content: `${prompt}, max words response 1000 words.`,
               },
             ],
           }),
