@@ -6,7 +6,7 @@ await mongoose.connect(`${process.env.databaseURL}`);
 
 export async function GET(
   req: Request,
-  { params }: { params: { chatId: string } }
+  { params }: { params: Promise<{ chatId: string }> }
 ) {
   const authHeader = req.headers.get("Authorization");
   const { chatId } = await params;

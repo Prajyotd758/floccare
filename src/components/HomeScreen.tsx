@@ -12,7 +12,7 @@ import { SmallSpinner } from "./Spinner";
 export default function HomeScreen({ chatId }: { chatId?: string }) {
   const [firstPrompt, setfirstPrompt] = useState<boolean>(true);
   const [prompt, setPrompt] = useState<string>("");
-  const [ScrollIn, SetScrollIn] = useState<String>("");
+  const [ScrollIn, SetScrollIn] = useState<string>("");
   const [toggle, SetToggle] = useState<boolean>(true);
 
   const containerRef = useRef<HTMLDivElement>(null);

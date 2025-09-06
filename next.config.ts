@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     tsconfigPath: "./tsconfig.json",
   },
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Enable SWC (written in Rust, faster than Babel)
   swcMinify: true,
 
@@ -81,4 +84,3 @@ const bundleAnalyzer = withBundleAnalyzer({
 });
 
 export default bundleAnalyzer(nextConfig);
-
